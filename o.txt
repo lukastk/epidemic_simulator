@@ -1,0 +1,1 @@
+g++ -c -Wall -Iinclude src/network_constructor.cpp -o src/network_constructor.o

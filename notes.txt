@@ -1,0 +1,9 @@
+0 - S
+1 - I
+2 - R
+
+Probability of infection: 1 - (1 - p)^n
+  n = neighbours
+
+Exceptions:
+10 - Doesn't recognize state in SIRModel::update.
