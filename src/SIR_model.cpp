@@ -1,8 +1,8 @@
 #include "SIR_model.h"
 
-SIRModel::SIRModel(short state_index, double p_infect, double p_infect_sensitive, double p_recover) : InfectionModel(state_index) {
+SIRModel::SIRModel(short state_index, double p_infect, double p_coinfect, double p_recover) : InfectionModel(state_index) {
   this->p_infect = p_infect;
-  this->p_infect_sensitive = p_infect_sensitive;
+  this->p_coinfect = p_coinfect;
   this->p_recover = p_recover;
 
   rand_dist = boost::random::uniform_real_distribution<double>(0, 1);
@@ -22,7 +22,7 @@ void SIRModel::try_infect(Node* source, Node* target, std::set<int>* node_update
     if (!target->is_sensitive() && p < p_infect) {
       set_node_state(target, STATE_I);
       node_update_set->insert(target->index);
-    } else if (target->is_sensitive() && p < p_infect_sensitive) {
+    } else if (target->is_sensitive() && p < p_coinfect) {
       set_node_state(target, STATE_I);
       node_update_set->insert(target->index);
     }
@@ -69,4 +69,22 @@ void SIRModel::set_random_generator(boost::random::mt19937* random) {
 
 bool SIRModel::node_should_be_updated(Node* node) {
   return get_node_state(node) == STATE_I;
+}
+
+void SIRModel::count_nodes_in_states(int* out, Node** nodes, int nodes_length, int node_state_index) {
+  out[0] = 0;
+  out[1] = 0;
+  out[2] = 0;
+
+  for (int i = 0; i < nodes_length; i++) {
+    Node* node = nodes[i];
+
+    int state = node->state[node_state_index];
+
+    if (state < 0 || state > 2) {
+      std::cerr << "State of node is out of bounds for SIRModel: " << state << std::endl;
+    }
+
+    out[state]++;
+  }
 }

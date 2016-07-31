@@ -190,10 +190,14 @@ void NetworkConstructor::create_lattice(int width, int height) {
   }
   */
 
+  /*
+  TODO: Delete
   for (int x = 0; x < width; x++) {
     delete lat[x];
   }
-  delete lat;
+  delete lat;*/
+
+  delete [] lat;
 
   is_lattice = true;
   lattice_width = width;

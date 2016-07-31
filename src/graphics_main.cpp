@@ -7,8 +7,8 @@ int main( int argc, char* args[] ) {
   int squareSize = 1;
   int delay = 0;
 
-  int lattice_w = 500;
-  int lattice_h = 500;
+  int lattice_w = 200;
+  int lattice_h = 200;
 
   int time_stop = -1;
 
@@ -20,15 +20,15 @@ int main( int argc, char* args[] ) {
   InfectionModel** infection_models = new InfectionModel*[2];
 
 
-  double p_infection = 0.6;
-  double p_infection_sensitive = 0.3;
+  double p_infect = 0.6;
+  double p_coeinfect = 0.3;
   double p_recover = 1.0;
 
   int seed = std::time(0);
   std::cout << "\nSeed: " << seed << std::endl;
 
-  infection_models[0] = new SIRModel(0, p_infection, p_infection_sensitive, p_recover);
-  infection_models[1] = new SIRModel(1, p_infection, p_infection_sensitive, p_recover);
+  infection_models[0] = new SIRModel(0, p_infect, p_coeinfect, p_recover);
+  infection_models[1] = new SIRModel(1, p_infect, p_coeinfect, p_recover);
 
   /*
   nc.add_edge(0, 1, 1);
@@ -53,10 +53,12 @@ int main( int argc, char* args[] ) {
   Simulation* sim = new Simulation(nodes, nodes_length, infection_models, infection_models_length);
   sim->random.seed(seed);
 
+  sim->initialize();
+
   node_lattice[50][50]->state[0] = SIRModel::STATE_I;
   node_lattice[80][80]->state[1] = SIRModel::STATE_I;
 
-  sim->initialize();
+  sim->refresh_node_update_list();
 
   /** END **/
 
@@ -177,7 +179,8 @@ int main( int argc, char* args[] ) {
   //Quit SDL subsystems
   SDL_Quit();
 
-	//delete sim;
+  delete[] nodes;
+  delete[] infection_models;
 
   return 0;
 }

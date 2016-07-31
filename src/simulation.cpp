@@ -7,7 +7,22 @@ Simulation::Simulation(Node** nodes, int nodes_length, InfectionModel** infectio
   this->infection_models_length = infection_models_length;
 
   random = boost::random::mt19937();
+}
 
+Simulation::~Simulation() {
+  /*for (int i = 0; i < infection_models_length; i++) {
+    delete infection_models[i];
+  }
+  delete infection_models;
+
+  for (int i = 0; i < nodes_length; i++) {
+    delete nodes[i];
+  }
+  delete nodes;
+  */
+}
+
+void Simulation::initialize() {
   for (int j = 0; j < infection_models_length; j++) {
     infection_models[j]->set_random_generator(&random);
   }
@@ -22,19 +37,7 @@ Simulation::Simulation(Node** nodes, int nodes_length, InfectionModel** infectio
   }
 }
 
-Simulation::~Simulation() {
-  for (int i = 0; i < infection_models_length; i++) {
-    delete infection_models[i];
-  }
-  delete infection_models;
-
-  for (int i = 0; i < nodes_length; i++) {
-    delete nodes[i];
-  }
-  delete nodes;
-}
-
-void Simulation::initialize() {
+void Simulation::refresh_node_update_list() {
   for (int i = 0; i < nodes_length; i++) {
     bool node_should_be_updated = false;
 
@@ -90,4 +93,8 @@ void Simulation::print_node_states() {
   for (int i = 0; i < nodes_length; i++) {
     std::cout << nodes[i]->state[0] << std::endl;
   }
+}
+
+bool Simulation::is_in_steady_state() {
+  return node_update_set.size() == 0;
 }

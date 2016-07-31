@@ -11,14 +11,15 @@
 
 class SIRModel : public InfectionModel {
 private:
-  double p_infect;
-  double p_infect_sensitive;
-  double p_recover;
   boost::random::uniform_real_distribution<double> rand_dist;
   boost::random::mt19937* random;
 
 public:
-  SIRModel(short state_index, double p_infect, double p_infect_sensitive, double p_recover);
+  double p_infect;
+  double p_coinfect;
+  double p_recover;
+
+  SIRModel(short state_index, double p_infect, double p_coinfect, double p_recover);
   ~SIRModel();
 
   void try_infect(Node* source, Node* target, std::set<int>* node_update_set);
@@ -27,6 +28,15 @@ public:
   void set_random_generator(boost::random::mt19937* random);
 
   bool node_should_be_updated(Node* node);
+
+  /**
+   * Copies onto an integer array the number of nodes in each state of the SIRModel, given an array of nodes. The passed array must be of size 3.
+   * @param out - The array that the data will be output to.
+   * @param nodes - The array of nodes
+   * @param nodes_length - Length of array
+   * @param node_state_index - The index that the infection's state is stored on on the node's state array.
+   */
+  void count_nodes_in_states(int* out, Node** nodes, int nodes_length, int node_state_index);
 
   static const short STATE_S = 0;
   static const short STATE_I = 1;

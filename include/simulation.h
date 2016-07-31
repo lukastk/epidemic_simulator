@@ -30,10 +30,24 @@ public:
   Node** get_nodes();
   int get_nodes_length();
 
+  /**
+   * Initializes the infection models by supplying them with a random number generator. The function also sets all the states of the infection models to S.
+   */
   void initialize();
+
+  /**
+   * Goes through the array of nodes, and puts the nodes that should be updated into the node_update_set.
+   */
+  void refresh_node_update_list();
+
   void update();
 
   void print_node_states();
+
+  /**
+   * Returns true if the simulation has reached a steady state. This essentially means that the node_update_set is empty.
+   */
+  bool is_in_steady_state();
 
 };
 
