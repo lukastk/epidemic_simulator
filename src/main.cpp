@@ -145,7 +145,7 @@ int main( int argc, char* args[] ) {
         //cout << "Run " << r + 1 <<  " complete" << endl;
       }
 
-      _output << endl;
+      sim_output << endl;
 
       p_coinfect += d_p_coinfect;
     }
