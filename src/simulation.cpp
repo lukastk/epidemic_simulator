@@ -28,7 +28,10 @@ void Simulation::initialize() {
   }
 
   for (int i = 0; i < nodes_length; i++) {
-    nodes[i]->state = new short[infection_models_length];
+
+    if (nodes[i]->state == NULL) {
+      nodes[i]->state = new short[infection_models_length];
+    }
     nodes[i]->state_length = infection_models_length;
 
     for (int j = 0; j < infection_models_length; j++) {

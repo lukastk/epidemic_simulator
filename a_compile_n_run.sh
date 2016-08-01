@@ -1,2 +1,2 @@
 make -f 'makefile.analytics'
-./sim 10 0.1
+./sim 1000 0.01 0.1

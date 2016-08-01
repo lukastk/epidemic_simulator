@@ -6,8 +6,8 @@ int main( int argc, char* args[] ) {
 
   /** Simulation parameters **/
 
-  int lattice_w = 200;
-  int lattice_h = 200;
+  int lattice_w = 100;
+  int lattice_h = 100;
 
   int init_infection_1_pos_x = 50;
   int init_infection_1_pos_y = 50;
@@ -16,13 +16,13 @@ int main( int argc, char* args[] ) {
 
   int run_per_set_of_parameters = atoi(args[1]);
 
-  double min_p_infect = 0.0;
-  double max_p_infect = 1.0;
+  double min_p_infect = 0;
+  double max_p_infect = 1;
   double d_p_infect = atof(args[2]);
 
   double min_p_coinfect = 0.99;
-  double max_p_coinfect = 1.0;
-  double d_p_coinfect = 0.1;
+  double max_p_coinfect = 0.99;
+  double d_p_coinfect = atof(args[3]);
 
   double min_p_recover = 1.0;
   double max_p_recover = 1.0;
@@ -94,59 +94,63 @@ int main( int argc, char* args[] ) {
 
   while (p_infect <= max_p_infect) {
 
-    cout << "Running with p_i: " << p_infect << endl;
+    p_coinfect = min_p_coinfect;
 
-    sim_output << p_infect << ", ";
-    sim_output << p_coinfect << ", ";
-    sim_output << p_recover << ", ";
+    while (p_coinfect <= max_p_coinfect) {
+      cout << "Running with p_i: " << p_infect << ", p_c: " << p_coinfect << ", p_r: " << p_recover << endl;
 
-    for (int r = 0; r < run_per_set_of_parameters; r++) {
+      sim_output << p_infect << ", ";
+      sim_output << p_coinfect << ", ";
+      sim_output << p_recover << ", ";
 
-      sir_models[0]->p_infect = p_infect;
-      sir_models[0]->p_coinfect = p_coinfect;
-      sir_models[0]->p_recover = p_recover;
-      sir_models[1]->p_infect = p_infect;
-      sir_models[1]->p_coinfect = p_coinfect;
-      sir_models[1]->p_recover = p_recover;
+      for (int r = 0; r < run_per_set_of_parameters; r++) {
 
-      sim->initialize();
+        sir_models[0]->p_infect = p_infect;
+        sir_models[0]->p_coinfect = p_coinfect;
+        sir_models[0]->p_recover = p_recover;
+        sir_models[1]->p_infect = p_infect;
+        sir_models[1]->p_coinfect = p_coinfect;
+        sir_models[1]->p_recover = p_recover;
 
-      node_lattice[init_infection_1_pos_x][init_infection_1_pos_y]->state[0] = SIRModel::STATE_I;
-      node_lattice[init_infection_2_pos_x][init_infection_2_pos_y]->state[1] = SIRModel::STATE_I;
+        sim->initialize();
 
-      sim->refresh_node_update_list();
+        node_lattice[init_infection_1_pos_x][init_infection_1_pos_y]->state[0] = SIRModel::STATE_I;
+        node_lattice[init_infection_2_pos_x][init_infection_2_pos_y]->state[1] = SIRModel::STATE_I;
 
-      time = 0;
+        sim->refresh_node_update_list();
 
-      while (!sim->is_in_steady_state()) {
-          sim->update();
-          time++;
+        time = 0;
+
+        while (!sim->is_in_steady_state()) {
+            sim->update();
+            time++;
+        }
+
+        sim_output << time << ", ";
+
+        sir_models[0]->count_nodes_in_states(data, nodes, nc.nodes_length, 0);
+
+        sim_output << data[0] << ", " << data[1] << ", " << data[2] << ", ";
+
+        sir_models[1]->count_nodes_in_states(data, nodes, nc.nodes_length, 1);
+
+        sim_output << data[0] << ", " << data[1] << ", " << data[2] << ", ";
+
+        if (r != run_per_set_of_parameters - 1) {
+          sim_output << count_RR(nodes, nc.nodes_length) << ", ";
+        } else {
+          sim_output << count_RR(nodes, nc.nodes_length);
+        }
+
+        //cout << "Run " << r + 1 <<  " complete" << endl;
       }
 
-      sim_output << time << ", ";
+      //_output << endl;
 
-      sir_models[0]->count_nodes_in_states(data, nodes, nc.nodes_length, 0);
-
-      sim_output << data[0] << ", " << data[1] << ", " << data[2] << ", ";
-
-      sir_models[1]->count_nodes_in_states(data, nodes, nc.nodes_length, 1);
-
-      sim_output << data[0] << ", " << data[1] << ", " << data[2] << ", ";
-
-      if (r != run_per_set_of_parameters - 1) {
-        sim_output << count_RR(nodes, nc.nodes_length) << ", ";
-      } else {
-        sim_output << count_RR(nodes, nc.nodes_length);
-      }
-
-      cout << "Run " << r + 1 <<  " complete" << endl;
+      p_coinfect += d_p_coinfect;
     }
 
-    sim_output << endl;
-
     p_infect += d_p_infect;
-
-    cout << endl;
   }
 
   delete[] data;

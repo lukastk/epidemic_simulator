@@ -16,6 +16,7 @@ public:
   bool is_sensitive();
   bool is_infected();
 
+  Node();
   ~Node();
 };
 
