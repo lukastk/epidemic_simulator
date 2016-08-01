@@ -16,8 +16,8 @@ int main( int argc, char* args[] ) {
 
   int run_per_set_of_parameters = atoi(args[1]);
 
-  double min_p_infect = 0;
-  double max_p_infect = 1;
+  double min_p_infect = 0.4;
+  double max_p_infect = 0.6;
   double d_p_infect = atof(args[2]);
 
   double min_p_coinfect = 0.99;
