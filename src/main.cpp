@@ -6,31 +6,24 @@ int main( int argc, char* args[] ) {
 
   /** Simulation parameters **/
 
-  int lattice_w = 100;
-  int lattice_h = 100;
+  int arg_i = 1;
 
-  int init_infection_1_pos_x = 50;
-  int init_infection_1_pos_y = 50;
-  int init_infection_2_pos_x = 80;
-  int init_infection_2_pos_y = 80;
+  int lattice_w = atoi(args[arg_i++]);
+  int lattice_h = atoi(args[arg_i++]);
 
-  int run_per_set_of_parameters = atoi(args[1]);
+  int run_per_set_of_parameters = atoi(args[arg_i++]);
 
-  double min_p_infect = 0.4;
-  double max_p_infect = 0.6;
-  double d_p_infect = atof(args[2]);
+  double min_p_infect = atof(args[arg_i++]);
+  double max_p_infect = atof(args[arg_i++]);
+  double d_p_infect = atof(args[arg_i++]);
 
-  double min_p_coinfect = 0.99;
-  double max_p_coinfect = 0.99;
-  double d_p_coinfect = atof(args[3]);
+  double min_p_coinfect = atof(args[arg_i++]);
+  double max_p_coinfect = atof(args[arg_i++]);
+  double d_p_coinfect = atof(args[arg_i++]);
 
-  double min_p_recover = 1.0;
-  double max_p_recover = 1.0;
-  double d_p_recover = 0.1;
-
-  double p_infect = min_p_infect;
-  double p_coinfect = min_p_coinfect;
-  double p_recover = min_p_recover;
+  double min_p_recover = atof(args[arg_i++]);
+  double max_p_recover = atof(args[arg_i++]);
+  double d_p_recover = atof(args[arg_i++]);
 
   /** Initialization **/
 
@@ -42,8 +35,8 @@ int main( int argc, char* args[] ) {
   int seed = std::time(0);
   std::cout << "\nSeed: " << seed << std::endl;
 
-  infection_models[0] = new SIRModel(0, p_infect, p_coinfect, p_recover);
-  infection_models[1] = new SIRModel(1, p_infect, p_coinfect, p_recover);
+  infection_models[0] = new SIRModel(0);
+  infection_models[1] = new SIRModel(1);
 
   // Create separate array with clear SIR instantiations
 
@@ -92,60 +85,83 @@ int main( int argc, char* args[] ) {
 
   sim_output << endl;
 
+  /* Start simulation */
+
+  // Random distribution to randomize where the infection starts each simulation
+  boost::random::mt19937 rng;
+  boost::random::uniform_int_distribution<> rand_int(0,lattice_w-1);
+
+  double p_infect = min_p_infect;
+  double p_coinfect;
+  double p_recover;
+
   while (p_infect <= max_p_infect) {
 
     p_coinfect = min_p_coinfect;
 
     while (p_coinfect <= max_p_coinfect) {
-      cout << "Running with p_i: " << p_infect << ", p_c: " << p_coinfect << ", p_r: " << p_recover << endl;
 
-      sim_output << p_infect << ", ";
-      sim_output << p_coinfect << ", ";
-      sim_output << p_recover << ", ";
+      p_recover = min_p_recover;
 
-      for (int r = 0; r < run_per_set_of_parameters; r++) {
+      while (p_recover <= max_p_recover) {
 
-        sir_models[0]->p_infect = p_infect;
-        sir_models[0]->p_coinfect = p_coinfect;
-        sir_models[0]->p_recover = p_recover;
-        sir_models[1]->p_infect = p_infect;
-        sir_models[1]->p_coinfect = p_coinfect;
-        sir_models[1]->p_recover = p_recover;
+        cout << "Running with p_i: " << p_infect << ", p_c: " << p_coinfect << ", p_r: " << p_recover << endl;
 
-        sim->initialize();
+        sim_output << p_infect << ", ";
+        sim_output << p_coinfect << ", ";
+        sim_output << p_recover << ", ";
 
-        node_lattice[init_infection_1_pos_x][init_infection_1_pos_y]->state[0] = SIRModel::STATE_I;
-        node_lattice[init_infection_2_pos_x][init_infection_2_pos_y]->state[1] = SIRModel::STATE_I;
+        for (int r = 0; r < run_per_set_of_parameters; r++) {
 
-        sim->refresh_node_update_list();
+          sir_models[0]->p_infect = p_infect;
+          sir_models[0]->p_coinfect = p_coinfect;
+          sir_models[0]->p_recover = p_recover;
+          sir_models[1]->p_infect = p_infect;
+          sir_models[1]->p_coinfect = p_coinfect;
+          sir_models[1]->p_recover = p_recover;
 
-        time = 0;
+          sim->initialize();
 
-        while (!sim->is_in_steady_state()) {
-            sim->update();
-            time++;
+          // Randomize the start of each infection
+
+          int infection_x = rand_int(rng);
+          int infection_y = rand_int(rng);
+
+          node_lattice[infection_x][infection_y]->state[0] = SIRModel::STATE_I;
+          node_lattice[infection_x][infection_y]->state[1] = SIRModel::STATE_I;
+
+          sim->refresh_node_update_list();
+
+          time = 0;
+
+          while (!sim->is_in_steady_state()) {
+              sim->update();
+              time++;
+          }
+
+          sim_output << time << ", ";
+
+          sir_models[0]->count_nodes_in_states(data, nodes, nc.nodes_length, 0);
+
+          sim_output << data[0] << ", " << data[1] << ", " << data[2] << ", ";
+
+          sir_models[1]->count_nodes_in_states(data, nodes, nc.nodes_length, 1);
+
+          sim_output << data[0] << ", " << data[1] << ", " << data[2] << ", ";
+
+          if (r != run_per_set_of_parameters - 1) {
+            sim_output << count_RR(nodes, nc.nodes_length) << ", ";
+          } else {
+            sim_output << count_RR(nodes, nc.nodes_length);
+          }
+
+          //cout << "Run " << r + 1 <<  " complete" << endl;
         }
 
-        sim_output << time << ", ";
+        sim_output << endl;
 
-        sir_models[0]->count_nodes_in_states(data, nodes, nc.nodes_length, 0);
-
-        sim_output << data[0] << ", " << data[1] << ", " << data[2] << ", ";
-
-        sir_models[1]->count_nodes_in_states(data, nodes, nc.nodes_length, 1);
-
-        sim_output << data[0] << ", " << data[1] << ", " << data[2] << ", ";
-
-        if (r != run_per_set_of_parameters - 1) {
-          sim_output << count_RR(nodes, nc.nodes_length) << ", ";
-        } else {
-          sim_output << count_RR(nodes, nc.nodes_length);
-        }
-
-        //cout << "Run " << r + 1 <<  " complete" << endl;
+        p_recover += d_p_recover;
       }
-
-      sim_output << endl;
 
       p_coinfect += d_p_coinfect;
     }

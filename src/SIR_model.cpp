@@ -8,6 +8,9 @@ SIRModel::SIRModel(short state_index, double p_infect, double p_coinfect, double
   rand_dist = boost::random::uniform_real_distribution<double>(0, 1);
 }
 
+SIRModel::SIRModel(short state_index) : SIRModel::SIRModel(state_index, -1, -1, -1) {
+}
+
 SIRModel::~SIRModel() {
 }
 

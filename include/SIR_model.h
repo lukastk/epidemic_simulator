@@ -20,6 +20,7 @@ public:
   double p_recover;
 
   SIRModel(short state_index, double p_infect, double p_coinfect, double p_recover);
+  SIRModel(short state_index);
   ~SIRModel();
 
   void try_infect(Node* source, Node* target, std::set<int>* node_update_set);
