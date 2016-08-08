@@ -7,8 +7,8 @@ int main( int argc, char* args[] ) {
   int squareSize = 1;
   int delay = 0;
 
-  int lattice_w = 200;
-  int lattice_h = 200;
+  int lattice_w = 400;
+  int lattice_h = 400;
 
   int time_stop = -1;
 
@@ -21,8 +21,8 @@ int main( int argc, char* args[] ) {
 
 
   double p_infect = 0.6;
-  double p_coeinfect = 0.3;
-  double p_recover = 1.0;
+  double p_coeinfect = 0.4;
+  double p_recover = 0.8;
 
   int seed = std::time(0);
   std::cout << "\nSeed: " << seed << std::endl;

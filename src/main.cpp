@@ -25,6 +25,8 @@ int main( int argc, char* args[] ) {
   double max_p_recover = atof(args[arg_i++]);
   double d_p_recover = atof(args[arg_i++]);
 
+  char* output_dir = args[arg_i++];
+
   /** Initialization **/
 
   NetworkConstructor nc;
@@ -58,7 +60,7 @@ int main( int argc, char* args[] ) {
   /** Initialize output **/
 
   std::ofstream sim_output;
-  sim_output.open("data/sim_data.csv");
+  sim_output.open(output_dir);
 
   /** Run simulation **/
 
